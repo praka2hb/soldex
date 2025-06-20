@@ -18,12 +18,5 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1600,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'crypto-js': ['crypto-js'],
-        }
-      }
-    }
   }
 })
