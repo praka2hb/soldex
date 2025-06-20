@@ -115,9 +115,9 @@ export default function AuthPage() {
       if (postgresForm.getValues("nftBids"))
         categories.push("NFT_BID", "NFT_BID_CANCELLED", "NFT_GLOBAL_BID", "NFT_GLOBAL_BID_CANCELLED")
       if (postgresForm.getValues("nftPrices"))
-        categories.push("NFT_LISTING", "NFT_SALE", "NFT_AUCTION_CREATED", "NFT_AUCTION_UPDATED")
-      if (postgresForm.getValues("borrowableTokens")) categories.push("LOAN", "OFFER_LOAN", "RESCIND_LOAN", "TAKE_LOAN")
-      if (postgresForm.getValues("tokenPrices")) categories.push("SWAP", "ADD_TO_POOL", "REMOVE_FROM_POOL")
+        categories.push("NFT_LISTING", "NFT_CANCEL_LISTING", "NFT_SALE", "NFT_MINT", "NFT_AUCTION_CREATED", "NFT_AUCTION_UPDATED", "NFT_AUCTION_CANCELLED")
+      if (postgresForm.getValues("borrowableTokens")) categories.push("LOAN", "REPAY_LOAN")
+      if (postgresForm.getValues("tokenPrices")) categories.push("SWAP", "ADD_TO_POOL", "REMOVE_FROM_POOL", "BUY", "SELL")
 
       // Use the single token address for all selected categories
       const tokenAddress = postgresForm.getValues("tokenAddress")

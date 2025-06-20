@@ -109,23 +109,48 @@ interface WebhookInfo {
   status: string
 }
 
-// Available transaction types
+// Available transaction types (Updated with official Helius accepted types)
 const TRANSACTION_TYPES = [
+  // NFT Bids
   { id: "NFT_BID", label: "NFT Bid", category: "NFT Bids" },
   { id: "NFT_BID_CANCELLED", label: "NFT Bid Cancelled", category: "NFT Bids" },
   { id: "NFT_GLOBAL_BID", label: "NFT Global Bid", category: "NFT Bids" },
   { id: "NFT_GLOBAL_BID_CANCELLED", label: "NFT Global Bid Cancelled", category: "NFT Bids" },
+  
+  // NFT Prices & Trading
   { id: "NFT_LISTING", label: "NFT Listing", category: "NFT Prices" },
+  { id: "NFT_CANCEL_LISTING", label: "NFT Cancel Listing", category: "NFT Prices" },
   { id: "NFT_SALE", label: "NFT Sale", category: "NFT Prices" },
+  { id: "NFT_MINT", label: "NFT Mint", category: "NFT Prices" },
   { id: "NFT_AUCTION_CREATED", label: "NFT Auction Created", category: "NFT Prices" },
   { id: "NFT_AUCTION_UPDATED", label: "NFT Auction Updated", category: "NFT Prices" },
-  { id: "OFFER_LOAN", label: "Offer Loan", category: "Borrowable Tokens" },
-  { id: "TAKE_LOAN", label: "Take Loan", category: "Borrowable Tokens" },
-  { id: "RESCIND_LOAN", label: "Rescind Loan", category: "Borrowable Tokens" },
+  { id: "NFT_AUCTION_CANCELLED", label: "NFT Auction Cancelled", category: "NFT Prices" },
+  
+  // Lending & Borrowing
+  { id: "LOAN", label: "Loan", category: "Borrowable Tokens" },
   { id: "REPAY_LOAN", label: "Repay Loan", category: "Borrowable Tokens" },
+  
+  // Token Trading & Liquidity
   { id: "SWAP", label: "Swap", category: "Token Prices" },
   { id: "ADD_TO_POOL", label: "Add to Pool", category: "Token Prices" },
   { id: "REMOVE_FROM_POOL", label: "Remove from Pool", category: "Token Prices" },
+  { id: "BUY", label: "Buy", category: "Token Prices" },
+  { id: "SELL", label: "Sell", category: "Token Prices" },
+  
+  // Token Operations
+  { id: "TRANSFER", label: "Transfer", category: "Token Operations" },
+  { id: "BURN", label: "Burn", category: "Token Operations" },
+  { id: "BURN_NFT", label: "Burn NFT", category: "Token Operations" },
+  { id: "TOKEN_MINT", label: "Token Mint", category: "Token Operations" },
+  { id: "DEPOSIT", label: "Deposit", category: "Token Operations" },
+  { id: "WITHDRAW", label: "Withdraw", category: "Token Operations" },
+  
+  // Staking
+  { id: "STAKE_TOKEN", label: "Stake Token", category: "Staking" },
+  { id: "UNSTAKE_TOKEN", label: "Unstake Token", category: "Staking" },
+  { id: "STAKE_SOL", label: "Stake SOL", category: "Staking" },
+  { id: "UNSTAKE_SOL", label: "Unstake SOL", category: "Staking" },
+  { id: "CLAIM_REWARDS", label: "Claim Rewards", category: "Staking" },
 ]
 
 // Format timestamp to a more readable format
@@ -196,6 +221,7 @@ const Dashboard = () => {
     lastUpdateTime: null
   })
   const [showAllWebhookData, setShowAllWebhookData] = useState(false)
+  const [showWebhookBanner, setShowWebhookBanner] = useState(true)
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -508,9 +534,9 @@ const Dashboard = () => {
   }
 
   const NFT_BIDS_SUBTYPES = ["NFT_BID", "NFT_BID_CANCELLED", "NFT_GLOBAL_BID", "NFT_GLOBAL_BID_CANCELLED"]
-  const NFT_PRICES_SUBTYPES = ["NFT_LISTING", "NFT_SALE", "NFT_AUCTION_CREATED", "NFT_AUCTION_UPDATED"]
-  const BORROWABLE_TOKENS_SUBTYPES = ["OFFER_LOAN", "RESCIND_LOAN", "TAKE_LOAN", "REPAY_LOAN"]
-  const TOKEN_PRICES_SUBTYPES = ["SWAP", "ADD_TO_POOL", "REMOVE_FROM_POOL"]
+  const NFT_PRICES_SUBTYPES = ["NFT_LISTING", "NFT_CANCEL_LISTING", "NFT_SALE", "NFT_MINT", "NFT_AUCTION_CREATED", "NFT_AUCTION_UPDATED", "NFT_AUCTION_CANCELLED"]
+  const BORROWABLE_TOKENS_SUBTYPES = ["LOAN", "REPAY_LOAN"]
+  const TOKEN_PRICES_SUBTYPES = ["SWAP", "ADD_TO_POOL", "REMOVE_FROM_POOL", "BUY", "SELL"]
 
   function getDefaultTab(userCategories: string[]) {
     if (hasCategory(userCategories, NFT_BIDS_SUBTYPES)) return "nft-bids"
@@ -825,6 +851,38 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Webhook Setup Notification Banner */}
+          {showWebhookBanner && (
+            <div className="mb-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200/50 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
+                      <Webhook className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                        Webhook Setup May Take Up to 2 Minutes
+                      </h3>
+                      <p className="text-sm text-slate-600 mt-1">
+                        Your Helius webhook is being configured. This process typically takes up to 2 minutes to complete. 
+                        Once ready, you'll start receiving real-time blockchain data.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowWebhookBanner(false)}
+                    className="h-8 w-8 hover:bg-blue-100 hover:text-blue-700 text-slate-500 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Summary Cards - First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -1595,10 +1653,10 @@ const Dashboard = () => {
                               {webhookInfo.status}
                             </Badge>
                           </div>
-                          <div className="md:col-span-2">
+                          {/* <div className="md:col-span-2">
                             <span className="font-medium text-slate-500">Webhook URL:</span>
                             <p className="font-mono text-xs break-all">{webhookInfo.webhookURL}</p>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     )}
