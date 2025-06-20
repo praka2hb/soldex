@@ -137,10 +137,6 @@ export default function AuthPage() {
           description: (response.data as { message?: string }).message || "User created successfully.",
         })
         navigate("/dashboard")
-      } else if (response.status === 409) {
-        toast("Error", {
-          description: "User with this Email already exists.",
-        })
       } else {
         toast("Error", {
           description: `Unexpected response: ${response.status}`,
@@ -148,11 +144,36 @@ export default function AuthPage() {
       }
     } catch (error: any) {
       // Check if axios returned a response with a specific status code
-      if (error.response && error.response.status === 409) {
-        toast("Error", {
-          description: error.response.data.error || "User with this Email already exists.",
+      if (error.response) {
+        if (error.response.status === 400) {
+          // Handle existing user error (backend returns 400 for existing users)
+          const errorMessage = error.response.data?.error || "User with this email already exists.";
+          toast("Email Already Exists", {
+            description: errorMessage,
+          })
+        } else if (error.response.status === 409) {
+          // Handle conflict errors
+          toast("Conflict Error", {
+            description: error.response.data?.error || "User with this email already exists.",
+          })
+        } else if (error.response.status >= 500) {
+          // Handle server errors
+          toast("Server Error", {
+            description: "Something went wrong on our end. Please try again later.",
+          })
+        } else {
+          // Handle other client errors
+          toast("Error", {
+            description: error.response.data?.error || "Something went wrong. Please try again.",
+          })
+        }
+      } else if (error.request) {
+        // Network error - no response received
+        toast("Connection Error", {
+          description: "Unable to connect to the server. Please check your internet connection and try again.",
         })
       } else {
+        // Other errors
         toast("Error", {
           description: "Something went wrong. Please try again.",
         })
@@ -249,454 +270,454 @@ export default function AuthPage() {
         <div className="max-w-7xl w-full">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-16 xl:gap-20 items-center">
             {/* Left Column - Marketing Content */}
-            <motion.div 
+        <motion.div 
               className="flex flex-col space-y-8 lg:space-y-10 order-2 lg:order-1"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <div className="space-y-6">
+            <motion.div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-sm font-medium text-blue-700 border border-blue-200/50"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <div className="space-y-6">
-                <motion.div 
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-sm font-medium text-blue-700 border border-blue-200/50"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Next-Generation Blockchain Indexing
-                </motion.div>
-                <div className="space-y-4">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-blue-900 to-purple-900 leading-tight">
-                    Soldex: Simplify Blockchain Data Indexing
-                  </h1>
-                  <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-                    Transform how you interact with Solana blockchain data. Soldex enables developers to seamlessly integrate and index blockchain data into PostgreSQL databases without complex infrastructure management.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-4">
-                <Feature
-                  icon={Database}
-                  title="Direct PostgreSQL Integration"
-                  description="Stream blockchain data directly into your PostgreSQL database with zero configuration hassle and real-time synchronization."
-                />
-                <Feature
-                  icon={Webhook}
-                  title="Helius-Powered Webhooks"
-                  description="Leverage enterprise-grade Helius webhooks for reliable, high-performance data streaming with built-in redundancy."
-                />
-                <Feature
-                  icon={Layers}
-                  title="Zero Infrastructure Management"
-                  description="Skip the complexity of RPC nodes, Geyser plugins, validators, and webhook infrastructure. We handle it all."
-                />
-              </div>
-
-              {/* Additional features badges */}
-              <div className="flex flex-wrap gap-3 pt-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-                  <Shield className="w-3 h-3" />
-                  Enterprise Security
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-                  <Zap className="w-3 h-3" />
-                  Real-time Updates
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
-                  <Database className="w-3 h-3" />
-                  99.9% Uptime
-                </div>
-              </div>
+              <Sparkles className="w-4 h-4" />
+              Next-Generation Blockchain Indexing
             </motion.div>
+            <div className="space-y-4">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-blue-900 to-purple-900 leading-tight">
+                Soldex: Simplify Blockchain Data Indexing
+              </h1>
+              <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
+                Transform how you interact with Solana blockchain data. Soldex enables developers to seamlessly integrate and index blockchain data into PostgreSQL databases without complex infrastructure management.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <Feature
+              icon={Database}
+              title="Direct PostgreSQL Integration"
+              description="Stream blockchain data directly into your PostgreSQL database with zero configuration hassle and real-time synchronization."
+            />
+            <Feature
+              icon={Webhook}
+              title="Helius-Powered Webhooks"
+              description="Leverage enterprise-grade Helius webhooks for reliable, high-performance data streaming with built-in redundancy."
+            />
+            <Feature
+              icon={Layers}
+              title="Zero Infrastructure Management"
+              description="Skip the complexity of RPC nodes, Geyser plugins, validators, and webhook infrastructure. We handle it all."
+            />
+          </div>
+
+          {/* Additional features badges */}
+          <div className="flex flex-wrap gap-3 pt-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+              <Shield className="w-3 h-3" />
+              Enterprise Security
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+              <Zap className="w-3 h-3" />
+              Real-time Updates
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+              <Database className="w-3 h-3" />
+              99.9% Uptime
+            </div>
+          </div>
+        </motion.div>
 
             {/* Right Column - Auth Forms */}
             <div className="flex items-center justify-center order-1 lg:order-2">
               <div className="w-full max-w-xl lg:max-w-none">
-                <AnimatePresence mode="wait">
-                  {isLoginMode ? (
-                    <motion.div
-                      key="login"
-                      initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <Card className="shadow-xl shadow-blue-100/25 border-blue-100/50 bg-white/80 backdrop-blur-sm">
-                        <Form {...accountForm}>
-                          <form onSubmit={accountForm.handleSubmit(onLoginSubmit)}>
-                            <CardHeader className="text-center space-y-2 pb-8">
-                              <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-blue-900">
-                                Welcome Back
-                              </CardTitle>
-                              <CardDescription className="text-slate-600">
-                                Sign in to continue to your Soldex dashboard
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                              <FormField
-                                control={accountForm.control}
-                                name="email"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-slate-700 font-medium">Email Address</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="you@example.com" 
-                                        className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
-                                        {...field} 
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={accountForm.control}
-                                name="password"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-slate-700 font-medium">Password</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="password" 
-                                        className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
-                                        {...field} 
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </CardContent>
-                            <CardFooter className="flex flex-col space-y-4 pt-6">
-                              <Button
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full h-11 font-medium shadow-lg shadow-blue-200/25 hover:shadow-xl hover:shadow-blue-300/25 transition-all duration-200"
-                                type="submit"
-                              >
-                                Sign In
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </Button>
-                              <div className="text-center text-sm text-slate-600">
-                                Don't have an account?{" "}
-                                <button
-                                  type="button"
-                                  onClick={() => setIsLoginMode(false)}
-                                  className="text-blue-600 hover:text-blue-700 font-medium hover:underline bg-transparent border-none p-0 cursor-pointer transition-colors"
-                                >
-                                  Create one now
-                                </button>
-                              </div>
-                            </CardFooter>
-                          </form>
-                        </Form>
-                      </Card>
-                    </motion.div>
-                  ) : step === 1 ? (
-                    <motion.div
-                      key="account"
-                      initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <Card className="shadow-xl shadow-blue-100/25 border-blue-100/50 bg-white/80 backdrop-blur-sm">
-                        <Form {...accountForm}>
-                          <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
-                            <CardHeader className="text-center space-y-2 pb-8">
-                              <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-blue-900">
-                                Get Started
-                              </CardTitle>
-                              <CardDescription className="text-slate-600">
-                                Create your Soldex account to start indexing blockchain data
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                              <FormField
-                                control={accountForm.control}
-                                name="email"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-slate-700 font-medium">Email Address</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="you@example.com" 
-                                        className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
-                                        {...field} 
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={accountForm.control}
-                                name="password"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-slate-700 font-medium">Password</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="password" 
-                                        className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
-                                        {...field} 
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </CardContent>
-                            <CardFooter className="flex flex-col space-y-4 pt-6">
-                              <Button
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full h-11 font-medium shadow-lg shadow-blue-200/25 hover:shadow-xl hover:shadow-blue-300/25 transition-all duration-200"
-                                type="submit"
-                              >
-                                Continue
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </Button>
-                              <div className="text-center text-sm text-slate-600">
-                                Already have an account?{" "}
-                                <button
-                                  type="button"
-                                  onClick={() => setIsLoginMode(true)}
-                                  className="text-blue-600 hover:text-blue-700 font-medium hover:underline bg-transparent border-none p-0 cursor-pointer transition-colors"
-                                >
-                                  Sign in
-                                </button>
-                              </div>
-                            </CardFooter>
-                          </form>
-                        </Form>
-                      </Card>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="postgres"
-                      initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <Card className="shadow-xl shadow-blue-100/25 border-blue-100/50 bg-white/80 backdrop-blur-sm">
-                        <Form {...postgresForm}>
-                          <form onSubmit={postgresForm.handleSubmit(onPostgresSubmit)}>
-                            <CardHeader className="text-center space-y-2 pb-8">
-                              <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-blue-900">
-                                Database Configuration
-                              </CardTitle>
-                              <CardDescription className="text-slate-600">
-                                Connect your PostgreSQL database and configure data indexing
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                              <FormField
-                                control={postgresForm.control}
-                                name="pgConnectionString"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-slate-700 font-medium">Database Connection String</FormLabel>
-                                    <FormControl>
-                                      <div className="relative w-full">
-                                        <Input
-                                          placeholder="postgresql://username:password@host:port/database"
-                                          {...field}
-                                          className="h-11 pr-20 border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono text-sm"
-                                        />
-                                        {field.value?.length > 0 && (
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                            onClick={async () => {
-                                              await validateConnectionString(field.value)
-                                            }}
-                                          >
-                                            Test
-                                          </Button>
-                                        )}
-                                      </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <div className="space-y-6 pt-6 border-t border-slate-200">
-                                <div className="space-y-2">
-                                  <h3 className="font-semibold text-slate-800">Data Types to Index</h3>
-                                  <p className="text-sm text-slate-600">Select the blockchain data you want to monitor and store</p>
-                                  {(postgresForm.formState.errors as any)._error && (
-                                    <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-                                      <p className="text-sm font-medium text-red-600">
-                                        {(postgresForm.formState.errors as any)._error.message}
-                                      </p>
-                                    </div>
+          <AnimatePresence mode="wait">
+            {isLoginMode ? (
+              <motion.div
+                key="login"
+                initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <Card className="shadow-xl shadow-blue-100/25 border-blue-100/50 bg-white/80 backdrop-blur-sm">
+                  <Form {...accountForm}>
+                    <form onSubmit={accountForm.handleSubmit(onLoginSubmit)}>
+                      <CardHeader className="text-center space-y-2 pb-8">
+                        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-blue-900">
+                          Welcome Back
+                        </CardTitle>
+                        <CardDescription className="text-slate-600">
+                          Sign in to continue to your Soldex dashboard
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <FormField
+                          control={accountForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-700 font-medium">Email Address</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="you@example.com" 
+                                  className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={accountForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-700 font-medium">Password</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="password" 
+                                  className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                      <CardFooter className="flex flex-col space-y-4 pt-6">
+                        <Button
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full h-11 font-medium shadow-lg shadow-blue-200/25 hover:shadow-xl hover:shadow-blue-300/25 transition-all duration-200"
+                          type="submit"
+                        >
+                          Sign In
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                        <div className="text-center text-sm text-slate-600">
+                          Don't have an account?{" "}
+                          <button
+                            type="button"
+                            onClick={() => setIsLoginMode(false)}
+                            className="text-blue-600 hover:text-blue-700 font-medium hover:underline bg-transparent border-none p-0 cursor-pointer transition-colors"
+                          >
+                            Create one now
+                          </button>
+                        </div>
+                      </CardFooter>
+                    </form>
+                  </Form>
+                </Card>
+              </motion.div>
+            ) : step === 1 ? (
+              <motion.div
+                key="account"
+                initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <Card className="shadow-xl shadow-blue-100/25 border-blue-100/50 bg-white/80 backdrop-blur-sm">
+                  <Form {...accountForm}>
+                    <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
+                      <CardHeader className="text-center space-y-2 pb-8">
+                        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-blue-900">
+                          Get Started
+                        </CardTitle>
+                        <CardDescription className="text-slate-600">
+                          Create your Soldex account to start indexing blockchain data
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <FormField
+                          control={accountForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-700 font-medium">Email Address</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="you@example.com" 
+                                  className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={accountForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-700 font-medium">Password</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="password" 
+                                  className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                      <CardFooter className="flex flex-col space-y-4 pt-6">
+                        <Button
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full h-11 font-medium shadow-lg shadow-blue-200/25 hover:shadow-xl hover:shadow-blue-300/25 transition-all duration-200"
+                          type="submit"
+                        >
+                          Continue
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                        <div className="text-center text-sm text-slate-600">
+                          Already have an account?{" "}
+                          <button
+                            type="button"
+                            onClick={() => setIsLoginMode(true)}
+                            className="text-blue-600 hover:text-blue-700 font-medium hover:underline bg-transparent border-none p-0 cursor-pointer transition-colors"
+                          >
+                            Sign in
+                          </button>
+                        </div>
+                      </CardFooter>
+                    </form>
+                  </Form>
+                </Card>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="postgres"
+                initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <Card className="shadow-xl shadow-blue-100/25 border-blue-100/50 bg-white/80 backdrop-blur-sm">
+                  <Form {...postgresForm}>
+                    <form onSubmit={postgresForm.handleSubmit(onPostgresSubmit)}>
+                      <CardHeader className="text-center space-y-2 pb-8">
+                        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-blue-900">
+                          Database Configuration
+                        </CardTitle>
+                        <CardDescription className="text-slate-600">
+                          Connect your PostgreSQL database and configure data indexing
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <FormField
+                          control={postgresForm.control}
+                          name="pgConnectionString"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-700 font-medium">Database Connection String</FormLabel>
+                              <FormControl>
+                                <div className="relative w-full">
+                                  <Input
+                                    placeholder="postgresql://username:password@host:port/database"
+                                    {...field}
+                                    className="h-11 pr-20 border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono text-sm"
+                                  />
+                                  {field.value?.length > 0 && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                      onClick={async () => {
+                                        await validateConnectionString(field.value)
+                                      }}
+                                    >
+                                      Test
+                                    </Button>
                                   )}
                                 </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="space-y-6 pt-6 border-t border-slate-200">
+                          <div className="space-y-2">
+                            <h3 className="font-semibold text-slate-800">Data Types to Index</h3>
+                            <p className="text-sm text-slate-600">Select the blockchain data you want to monitor and store</p>
+                            {(postgresForm.formState.errors as any)._error && (
+                              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                                <p className="text-sm font-medium text-red-600">
+                                  {(postgresForm.formState.errors as any)._error.message}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                                 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <FormField
-                                    control={postgresForm.control}
-                                    name="nftBids"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col space-y-3">
-                                        <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={field.value}
-                                              onCheckedChange={(checked) => {
-                                                field.onChange(checked)
-                                              }}
-                                              className="mt-0.5"
-                                            />
-                                          </FormControl>
-                                          <div className="space-y-1 flex-1">
-                                            <FormLabel className="text-slate-800 font-medium cursor-pointer">NFT Bids</FormLabel>
-                                            <p className="text-sm text-slate-600 leading-relaxed">
-                                              Track and index NFT marketplace bids and offers in real-time
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <FormField
-                                    control={postgresForm.control}
-                                    name="tokenPrices"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col space-y-3">
-                                        <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={field.value}
-                                              onCheckedChange={(checked) => {
-                                                field.onChange(checked)
-                                              }}
-                                              className="mt-0.5"
-                                            />
-                                          </FormControl>
-                                          <div className="space-y-1 flex-1">
-                                            <FormLabel className="text-slate-800 font-medium cursor-pointer">Token Prices</FormLabel>
-                                            <p className="text-sm text-slate-600 leading-relaxed">
-                                              Index real-time token prices and market data from DEXs
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <FormField
-                                    control={postgresForm.control}
-                                    name="borrowableTokens"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col space-y-3">
-                                        <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={field.value}
-                                              onCheckedChange={(checked) => {
-                                                field.onChange(checked)
-                                              }}
-                                              className="mt-0.5"
-                                            />
-                                          </FormControl>
-                                          <div className="space-y-1 flex-1">
-                                            <FormLabel className="text-slate-800 font-medium cursor-pointer">Borrowable Tokens</FormLabel>
-                                            <p className="text-sm text-slate-600 leading-relaxed">
-                                              Index tokens available for borrowing and lending protocols
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <FormField
-                                    control={postgresForm.control}
-                                    name="nftPrices"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col space-y-3">
-                                        <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={field.value}
-                                              onCheckedChange={(checked) => {
-                                                field.onChange(checked)
-                                              }}
-                                              className="mt-0.5"
-                                            />
-                                          </FormControl>
-                                          <div className="space-y-1 flex-1">
-                                            <FormLabel className="text-slate-800 font-medium cursor-pointer">NFT Prices</FormLabel>
-                                            <p className="text-sm text-slate-600 leading-relaxed">
-                                              Index NFT prices and historical sales data from marketplaces
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </FormItem>
-                                    )}
-                                  />
+                          <FormField
+                            control={postgresForm.control}
+                            name="nftBids"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col space-y-3">
+                                <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value}
+                                      onCheckedChange={(checked) => {
+                                        field.onChange(checked)
+                                      }}
+                                      className="mt-0.5"
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 flex-1">
+                                    <FormLabel className="text-slate-800 font-medium cursor-pointer">NFT Bids</FormLabel>
+                                    <p className="text-sm text-slate-600 leading-relaxed">
+                                      Track and index NFT marketplace bids and offers in real-time
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={postgresForm.control}
+                            name="tokenPrices"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col space-y-3">
+                                <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value}
+                                      onCheckedChange={(checked) => {
+                                        field.onChange(checked)
+                                      }}
+                                      className="mt-0.5"
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 flex-1">
+                                    <FormLabel className="text-slate-800 font-medium cursor-pointer">Token Prices</FormLabel>
+                                    <p className="text-sm text-slate-600 leading-relaxed">
+                                      Index real-time token prices and market data from DEXs
+                                    </p>
+                                  </div>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={postgresForm.control}
+                            name="borrowableTokens"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col space-y-3">
+                                <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value}
+                                      onCheckedChange={(checked) => {
+                                        field.onChange(checked)
+                                      }}
+                                      className="mt-0.5"
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 flex-1">
+                                    <FormLabel className="text-slate-800 font-medium cursor-pointer">Borrowable Tokens</FormLabel>
+                                    <p className="text-sm text-slate-600 leading-relaxed">
+                                      Index tokens available for borrowing and lending protocols
+                                    </p>
+                                  </div>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={postgresForm.control}
+                            name="nftPrices"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col space-y-3">
+                                <div className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-200">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value}
+                                      onCheckedChange={(checked) => {
+                                        field.onChange(checked)
+                                      }}
+                                      className="mt-0.5"
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 flex-1">
+                                    <FormLabel className="text-slate-800 font-medium cursor-pointer">NFT Prices</FormLabel>
+                                    <p className="text-sm text-slate-600 leading-relaxed">
+                                      Index NFT prices and historical sales data from marketplaces
+                                    </p>
+                                  </div>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                                </div>
+                        </div>
 
-                              {/* Common Token Address Field */}
-                              <FormField
-                                control={postgresForm.control}
-                                name="tokenAddress"
-                                render={({ field }) => (
-                                  <FormItem className="space-y-3">
-                                    <FormLabel className="text-slate-700 font-medium">Token/Collection Address</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        placeholder="Enter token mint or NFT collection address to monitor"
-                                        className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <div className="text-xs text-slate-600 leading-relaxed">
-                                      This address will be used for all selected transaction types above. For NFT-related data, enter the collection address. For token data, enter the mint address.
-                                    </div>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </CardContent>
-                            <CardFooter className="flex flex-col space-y-4 pt-8">
-                              <div className="flex w-full gap-3">
-                                <Button
-                                  variant="outline"
-                                  type="button"
-                                  onClick={() => setStep(1)}
-                                  className="h-11 px-6 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
-                                >
-                                  <ChevronLeft className="mr-2 h-4 w-4" />
-                                  Back
-                                </Button>
-                                <Button
-                                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 flex-1 h-11 font-medium shadow-lg shadow-blue-200/25 hover:shadow-xl hover:shadow-blue-300/25 transition-all duration-200"
-                                  type="submit"
-                                  disabled={isSubmitting}
-                                >
-                                  {isSubmitting ? (
-                                    <>
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                      Setting up your indexer...
-                                    </>
-                                  ) : (
-                                    <>
-                                      Complete Setup
-                                      <ArrowRight className="ml-2 h-4 w-4" />
-                                    </>
-                                  )}
-                                </Button>
+                        {/* Common Token Address Field */}
+                        <FormField
+                          control={postgresForm.control}
+                          name="tokenAddress"
+                          render={({ field }) => (
+                            <FormItem className="space-y-3">
+                              <FormLabel className="text-slate-700 font-medium">Token/Collection Address</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Enter token mint or NFT collection address to monitor"
+                                  className="h-11 border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <div className="text-xs text-slate-600 leading-relaxed">
+                                This address will be used for all selected transaction types above. For NFT-related data, enter the collection address. For token data, enter the mint address.
                               </div>
-                            </CardFooter>
-                          </form>
-                        </Form>
-                      </Card>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                      <CardFooter className="flex flex-col space-y-4 pt-8">
+                        <div className="flex w-full gap-3">
+                          <Button
+                            variant="outline"
+                            type="button"
+                            onClick={() => setStep(1)}
+                            className="h-11 px-6 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+                          >
+                            <ChevronLeft className="mr-2 h-4 w-4" />
+                            Back
+                          </Button>
+                          <Button
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 flex-1 h-11 font-medium shadow-lg shadow-blue-200/25 hover:shadow-xl hover:shadow-blue-300/25 transition-all duration-200"
+                            type="submit"
+                            disabled={isSubmitting}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Setting up your indexer...
+                              </>
+                            ) : (
+                              <>
+                                Complete Setup
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </form>
+                  </Form>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
               </div>
             </div>
           </div>
@@ -704,4 +725,4 @@ export default function AuthPage() {
       </div>
     </div>
   )
-} 
+}
